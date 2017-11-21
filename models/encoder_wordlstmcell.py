@@ -1,13 +1,12 @@
 # coding=utf-8
-from loaddata.common import paddingkey, unkkey
+from loaddata.common import paddingkey
 import torch.nn
 import torch.nn as nn
-import torch.nn.functional as F
+import  torch.nn.functional as F
 from torch.autograd import Variable
 import torch.nn.init as init
 import numpy as np
 import random
-from loaddata.Load_pretrain import Load_Pretrain
 import hyperparams as hy
 torch.manual_seed(hy.seed_num)
 random.seed(hy.seed_num)
@@ -33,43 +32,34 @@ class Encoder_WordLstm(nn.Module):
         for index in range(self.args.embed_bichar_dim):
             self.bichar_embed.weight.data[self.args.create_alphabet.bichar_PaddingID][index] = 0
         self.bichar_embed.weight.requires_grad = True
-
-
         # fix the word embedding
-        # self.static_char_embed = nn.Embedding(self.args.static_embed_char_num, self.args.embed_char_dim)
-        self.static_char_embed, self.static_char_dim = Load_Pretrain().load_pretrain(self.args.char_Embedding_path,
-                                                                  self.args.create_alphabet.static_char_alphabet,
-                                                                  unkkey, paddingkey)
-        self.static_char_embed.weight.requires_grad = False
-
-        self.static_bichar_embed, self.static_bichar_dim = Load_Pretrain().load_pretrain(self.args.bichar_Embedding_Path,
-                                                                    self.args.create_alphabet.static_bichar_alphabet,
-                                                                    unkkey, paddingkey)
-        self.static_bichar_embed.weight.requires_grad = False
-
-        # self.static_bichar_embed = nn.Embedding(self.args.static_embed_bichar_num, self.args.embed_bichar_dim)
-
+        self.static_char_embed = nn.Embedding(self.args.static_embed_char_num, self.args.embed_char_dim)
+        init.uniform(self.static_char_embed.weight, a=-np.sqrt(3 / self.args.embed_char_dim),
+                     b=np.sqrt(3 / self.args.embed_char_dim))
+        self.static_bichar_embed = nn.Embedding(self.args.static_embed_bichar_num, self.args.embed_bichar_dim)
+        init.uniform(self.static_bichar_embed.weight, a=-np.sqrt(3 / self.args.embed_bichar_dim),
+                     b=np.sqrt(3 / self.args.embed_bichar_dim))
 
         # self.char_embed.cuda()
         # self.bichar_embed.cuda()
         # load external word embedding
-        # if args.char_Embedding is True:
-        #     print("char_Embedding")
-        #     pretrained_char_weight = np.array(args.pre_char_word_vecs)
-        #     self.static_char_embed.weight.data.copy_(torch.from_numpy(pretrained_char_weight))
-        #     for index in range(self.args.embed_char_dim):
-        #         self.static_char_embed.weight.data[self.args.create_static_alphabet.char_PaddingID][index] = 0
-        #     self.static_char_embed.weight.requires_grad = False
+        if args.char_Embedding is True:
+            print("char_Embedding")
+            pretrained_char_weight = np.array(args.pre_char_word_vecs)
+            self.static_char_embed.weight.data.copy_(torch.from_numpy(pretrained_char_weight))
+            for index in range(self.args.embed_char_dim):
+                self.static_char_embed.weight.data[self.args.create_static_alphabet.char_PaddingID][index] = 0
+            self.static_char_embed.weight.requires_grad = False
 
-        # if args.bichar_Embedding is True:
-        #     print("bichar_Embedding")
-        #     pretrained_bichar_weight = np.array(args.pre_bichar_word_vecs)
-        #     self.static_bichar_embed.weight.data.copy_(torch.from_numpy(pretrained_bichar_weight))
-        #     print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID])
-        #     print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_UnkID])
-            # for index in range(self.args.embed_bichar_dim):
-            #     self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID][index] = 0
-            # self.static_bichar_embed.weight.requires_grad = False
+        if args.bichar_Embedding is True:
+            print("bichar_Embedding")
+            pretrained_bichar_weight = np.array(args.pre_bichar_word_vecs)
+            self.static_bichar_embed.weight.data.copy_(torch.from_numpy(pretrained_bichar_weight))
+            # print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID])
+            # print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_UnkID])
+            for index in range(self.args.embed_bichar_dim):
+                self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID][index] = 0
+            self.static_bichar_embed.weight.requires_grad = False
 
         self.lstm_left = nn.LSTMCell(input_size=self.args.hidden_size, hidden_size=self.args.rnn_hidden_dim, bias=True)
         self.lstm_right = nn.LSTMCell(input_size=self.args.hidden_size, hidden_size=self.args.rnn_hidden_dim, bias=True)
@@ -113,7 +103,9 @@ class Encoder_WordLstm(nn.Module):
         # print("Encoder forward")
         # batch_length = features.char_features.size(0)
         batch_length = features.batch_length
-        char_features_num = features.char_features.size(1)
+        # char_features_num = features.char_features.size(1)
+        char_features_num = features.static_char_features.size(1)
+        # print("char_features_num {}".format(char_features_num))
         # fine tune
         # print(features.char_features)
         char_features = self.char_embed(features.char_features)
@@ -146,11 +138,11 @@ class Encoder_WordLstm(nn.Module):
         # print(right_concat.size())
 
         # non-linear
-        left_concat = self.dropout(F.tanh(self.liner(left_concat)))
+        left_concat_non_linear = self.dropout(F.tanh(self.liner(left_concat)))
         # left_concat = left_concat.view(batch_length, char_features_num, self.args.rnn_hidden_dim)
-        left_concat = left_concat.permute(1, 0, 2)
-        right_concat = self.dropout(F.tanh(self.liner(right_concat)))
-        right_concat = right_concat.permute(1, 0, 2)
+        left_concat_input = left_concat_non_linear.permute(1, 0, 2)
+        right_concat_non_linear = self.dropout(F.tanh(self.liner(right_concat)))
+        right_concat_input = right_concat_non_linear.permute(1, 0, 2)
         # right_concat = right_concat.view(batch_length, char_features_num, self.args.rnn_hidden_dim)
         # print(batch_length)
         self.hidden_l = self.init_hidden_cell(batch_length)
@@ -158,7 +150,7 @@ class Encoder_WordLstm(nn.Module):
         # print(left_c)
         left_lstm_output = []
         for idx in range(char_features_num):
-            left_h, left_c = self.lstm_left(left_concat[idx], self.hidden_l)
+            left_h, left_c = self.lstm_left(left_concat_input[idx], self.hidden_l)
             left_h = self.dropout(left_h)
             left_lstm_output.append(left_h.view(batch_length, 1, self.args.rnn_hidden_dim))
         left_lstm_output = torch.cat(left_lstm_output, 1)
@@ -167,7 +159,7 @@ class Encoder_WordLstm(nn.Module):
         right_lstm_output = []
         for idx in reversed(range(char_features_num)):
             # print(idx)
-            right_h, right_c = self.lstm_right(right_concat[idx], self.hidden_r)
+            right_h, right_c = self.lstm_right(right_concat_input[idx], self.hidden_r)
             right_h = self.dropout(right_h)
             right_lstm_output.insert(0, right_h.view(batch_length, 1, self.args.rnn_hidden_dim))
         right_lstm_output = torch.cat(right_lstm_output, 1)

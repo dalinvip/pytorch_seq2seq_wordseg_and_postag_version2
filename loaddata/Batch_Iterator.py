@@ -32,12 +32,13 @@ class Iterators():
         self.operator_static = operator_static
         for id_data in range(len(data)):
             print("*****************    create {} iterator    **************".format(id_data + 1))
+            # feats = []
             self.convert_word2id(self.data[id_data], self.operator, self.operator_static)
-            self.features = self.create_onedata_Iterator(insts=self.data[id_data], batch_size=self.batch_size[id_data],
+            feats = self.create_onedata_Iterator(insts=self.data[id_data], batch_size=self.batch_size[id_data],
                                                          operator=self.operator,
                                                          operator_static=self.operator_static)
-            self.data_iter.append(self.features)
-            self.features = []
+            self.data_iter.append(feats)
+            # self.features = []
         return self.data_iter[0], self.data_iter[1], self.data_iter[2]
         # return self.data_iter[0]
 
@@ -114,6 +115,7 @@ class Iterators():
     def create_onedata_Iterator(self, insts, batch_size, operator, operator_static):
         batch = []
         count_inst = 0
+        self.features = []
         for index, inst in enumerate(insts):
             batch.append(inst)
             count_inst += 1
@@ -204,11 +206,11 @@ class Iterators():
             for id_bichar_left_index in range(max_bichar_size):
                 if id_bichar_left_index < inst.bichars_size:
                     batch_bichar_left_features.data[id_inst][id_bichar_left_index] = inst.bichars_left_index[id_bichar_left_index]
-                    batch_static_bichar_left_features.data[id_inst][id_bichar_left_index] = int(inst.static_bichars_left_index[id_bichar_left_index])
+                    batch_static_bichar_left_features.data[id_inst][id_bichar_left_index] = inst.static_bichars_left_index[id_bichar_left_index]
                 else:
                     # print("aaa", operator.bichar_PaddingID)
                     batch_bichar_left_features.data[id_inst][id_bichar_left_index] = operator.bichar_PaddingID
-                    batch_static_bichar_left_features.data[id_inst][id_bichar_left_index] = int(operator.static_bichar_PaddingID)
+                    batch_static_bichar_left_features.data[id_inst][id_bichar_left_index] = operator.static_bichar_PaddingID
 
             # copy with the bichar_right features
             for id_bichar_right_index in range(max_bichar_size):
