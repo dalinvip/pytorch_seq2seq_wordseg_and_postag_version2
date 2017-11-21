@@ -129,7 +129,7 @@ def dalaloader(args):
     # create_static_alphabet.createAlphabet(train_data=train_data)
     # create iterator
     create_iter = Iterators()
-    train_iter, dev_iter, test_iter = create_iter.createIterator(batch_size=args.batch_size,
+    train_iter, dev_iter, test_iter = create_iter.createIterator(batch_size=[args.batch_size, 1, 1],
                                                                  data=[train_data, dev_data, test_data],
                                                                  # operator=create_static_alphabet, args=args)
                                                                  operator=create_alphabet,
