@@ -1,12 +1,12 @@
-# coding=utf-8
-from loaddata.common import paddingkey
+from loaddata.common import paddingkey, unkkey
 import torch.nn
 import torch.nn as nn
-import  torch.nn.functional as F
+import torch.nn.functional as F
 from torch.autograd import Variable
 import torch.nn.init as init
 import numpy as np
 import random
+from loaddata.Load_pretrain import Load_Pretrain
 import hyperparams as hy
 torch.manual_seed(hy.seed_num)
 random.seed(hy.seed_num)
@@ -32,34 +32,43 @@ class Encoder_WordLstm(nn.Module):
         for index in range(self.args.embed_bichar_dim):
             self.bichar_embed.weight.data[self.args.create_alphabet.bichar_PaddingID][index] = 0
         self.bichar_embed.weight.requires_grad = True
+
+
         # fix the word embedding
-        self.static_char_embed = nn.Embedding(self.args.static_embed_char_num, self.args.embed_char_dim)
-        init.uniform(self.static_char_embed.weight, a=-np.sqrt(3 / self.args.embed_char_dim),
-                     b=np.sqrt(3 / self.args.embed_char_dim))
-        self.static_bichar_embed = nn.Embedding(self.args.static_embed_bichar_num, self.args.embed_bichar_dim)
-        init.uniform(self.static_bichar_embed.weight, a=-np.sqrt(3 / self.args.embed_bichar_dim),
-                     b=np.sqrt(3 / self.args.embed_bichar_dim))
+        # self.static_char_embed = nn.Embedding(self.args.static_embed_char_num, self.args.embed_char_dim)
+        self.static_char_embed, self.static_char_dim = Load_Pretrain().load_pretrain(self.args.char_Embedding_path,
+                                                                  self.args.create_alphabet.static_char_alphabet,
+                                                                  unkkey, paddingkey)
+        self.static_char_embed.weight.requires_grad = False
+
+        self.static_bichar_embed, self.static_bichar_dim = Load_Pretrain().load_pretrain(self.args.bichar_Embedding_Path,
+                                                                    self.args.create_alphabet.static_bichar_alphabet,
+                                                                    unkkey, paddingkey)
+        self.static_bichar_embed.weight.requires_grad = False
+
+        # self.static_bichar_embed = nn.Embedding(self.args.static_embed_bichar_num, self.args.embed_bichar_dim)
+
 
         # self.char_embed.cuda()
         # self.bichar_embed.cuda()
         # load external word embedding
-        if args.char_Embedding is True:
-            print("char_Embedding")
-            pretrained_char_weight = np.array(args.pre_char_word_vecs)
-            self.static_char_embed.weight.data.copy_(torch.from_numpy(pretrained_char_weight))
-            for index in range(self.args.embed_char_dim):
-                self.static_char_embed.weight.data[self.args.create_static_alphabet.char_PaddingID][index] = 0
-            self.static_char_embed.weight.requires_grad = False
+        # if args.char_Embedding is True:
+        #     print("char_Embedding")
+        #     pretrained_char_weight = np.array(args.pre_char_word_vecs)
+        #     self.static_char_embed.weight.data.copy_(torch.from_numpy(pretrained_char_weight))
+        #     for index in range(self.args.embed_char_dim):
+        #         self.static_char_embed.weight.data[self.args.create_static_alphabet.char_PaddingID][index] = 0
+        #     self.static_char_embed.weight.requires_grad = False
 
-        if args.bichar_Embedding is True:
-            print("bichar_Embedding")
-            pretrained_bichar_weight = np.array(args.pre_bichar_word_vecs)
-            self.static_bichar_embed.weight.data.copy_(torch.from_numpy(pretrained_bichar_weight))
-            # print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID])
-            # print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_UnkID])
-            for index in range(self.args.embed_bichar_dim):
-                self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID][index] = 0
-            self.static_bichar_embed.weight.requires_grad = False
+        # if args.bichar_Embedding is True:
+        #     print("bichar_Embedding")
+        #     pretrained_bichar_weight = np.array(args.pre_bichar_word_vecs)
+        #     self.static_bichar_embed.weight.data.copy_(torch.from_numpy(pretrained_bichar_weight))
+        #     print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID])
+        #     print(self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_UnkID])
+            # for index in range(self.args.embed_bichar_dim):
+            #     self.static_bichar_embed.weight.data[self.args.create_static_alphabet.bichar_PaddingID][index] = 0
+            # self.static_bichar_embed.weight.requires_grad = False
 
         self.lstm_left = nn.LSTMCell(input_size=self.args.hidden_size, hidden_size=self.args.rnn_hidden_dim, bias=True)
         self.lstm_right = nn.LSTMCell(input_size=self.args.hidden_size, hidden_size=self.args.rnn_hidden_dim, bias=True)
