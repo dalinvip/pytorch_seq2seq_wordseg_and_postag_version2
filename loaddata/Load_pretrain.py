@@ -61,3 +61,5 @@ class Load_Pretrain:
               "OOV Ratio: ", oov / alpha.m_size)
         print("OOV ", unk, "use avg value initialize")
         return emb, embDim
+
+

@@ -35,8 +35,7 @@ class Iterators():
             # feats = []
             self.convert_word2id(self.data[id_data], self.operator, self.operator_static)
             feats = self.create_onedata_Iterator(insts=self.data[id_data], batch_size=self.batch_size[id_data],
-                                                         operator=self.operator,
-                                                         operator_static=self.operator_static)
+                                                 operator=self.operator, operator_static=self.operator_static)
             self.data_iter.append(feats)
             # self.features = []
         return self.data_iter[0], self.data_iter[1], self.data_iter[2]
@@ -44,7 +43,7 @@ class Iterators():
 
     def convert_word2id(self, insts, operator, operator_static):
         # print(len(insts))
-        for index_inst, inst in enumerate(insts):
+        for inst in insts:
             # copy with the word and pos
             for index in range(inst.words_size):
                 word = inst.words[index]

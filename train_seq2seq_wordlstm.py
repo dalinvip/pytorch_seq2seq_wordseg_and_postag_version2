@@ -53,9 +53,12 @@ def train(train_iter, dev_iter, test_iter, model_encoder, model_decoder, args):
         print("optimizer_decoder now lr is {} \n".format(optimizer_decoder.param_groups[0].get("lr")))
 
         # shuffle
-        # random.shuffle(train_iter)
+        random.shuffle(train_iter)
         # random.shuffle(dev_iter)
         # random.shuffle(test_iter)
+
+        model_encoder.train()
+        model_decoder.train()
 
         for batch_count, batch_features in enumerate(train_iter):
             # print("batch_count", batch_count)
@@ -92,8 +95,8 @@ def train(train_iter, dev_iter, test_iter, model_encoder, model_decoder, args):
             if steps % args.log_interval == 0:
                 # print("batch_count = {} , loss is {:.6f} , (correct/ total_num) = acc ({} / {}) = {:.6f}%\r".format(
                 #     batch_count+1, loss.data[0], correct, total_num, train_acc*100))
-                sys.stdout.write("\rbatch_count = [{}] , loss is {:.6f} , (correct/ total_num) = acc ({} / {}) = {:.6f}%".format(
-                    batch_count+1, loss.data[0], correct, total_num, train_acc*100))
+                sys.stdout.write("\rbatch_count = [{}] , loss is {:.6f} , (correct/ total_num) = acc ({} / {}) = "
+                                 "{:.6f}%".format(batch_count+1, loss.data[0], correct, total_num, train_acc*100))
             if steps % args.dev_interval == 0:
                 print("\ndev F-score")
                 dev_eval_pos.clear()
@@ -107,6 +110,8 @@ def train(train_iter, dev_iter, test_iter, model_encoder, model_decoder, args):
                 test_eval_seg.clear()
                 eval(test_iter, model_encoder, model_decoder, args, test_eval_seg, test_eval_pos)
                 print("\n")
+        model_encoder.eval()
+        model_decoder.eval()
         if steps is not 0:
             print("\none epoch dev F-score")
             dev_eval_pos.clear()
@@ -177,8 +182,8 @@ def getMaxindex(decode_out_acc, args):
 
 def eval(data_iter, model_encoder, model_decoder, args, eval_seg, eval_pos):
     # print("eval function")
-    model_encoder.eval()
-    model_decoder.eval()
+    # model_encoder.eval()
+    # model_decoder.eval()
     loss = 0
     # eval_seg = Eval()
     # eval_pos = Eval()
@@ -200,8 +205,8 @@ def eval(data_iter, model_encoder, model_decoder, args, eval_seg, eval_pos):
     print("pos dev: precision = {}%  recall = {}% , f-score = {}%".format(p, r, f))
     # print("\n")
 
-    model_encoder.train()
-    model_decoder.train()
+    # model_encoder.train()
+    # model_decoder.train()
 
 
 

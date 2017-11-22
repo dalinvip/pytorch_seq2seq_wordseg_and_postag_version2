@@ -60,15 +60,15 @@ class Decoder_WordLstm(nn.Module):
 
         self.softmax = nn.LogSoftmax()
 
-        self.bucket = Variable(torch.zeros(1, self.args.label_size))
-        self.bucket_rnn = Variable(torch.zeros(1, self.args.rnn_hidden_dim))
+        self.bucket = Variable(torch.zeros(1, self.args.label_size)).type(torch.FloatTensor)
+        self.bucket_rnn = Variable(torch.zeros(1, self.args.rnn_hidden_dim)).type(torch.FloatTensor)
         if self.args.use_cuda is True:
             self.bucket = self.bucket.cuda()
             self.bucket_rnn = self.bucket_rnn.cuda()
 
-        self.z_bucket = Variable(torch.zeros(1, self.args.hidden_size))
-        self.h_bucket = Variable(torch.zeros(1, self.args.rnn_hidden_dim))
-        self.c_bucket = Variable(torch.zeros(1, self.args.rnn_hidden_dim))
+        self.z_bucket = Variable(torch.zeros(1, self.args.hidden_size)).type(torch.FloatTensor)
+        self.h_bucket = Variable(torch.zeros(1, self.args.rnn_hidden_dim)).type(torch.FloatTensor)
+        self.c_bucket = Variable(torch.zeros(1, self.args.rnn_hidden_dim)).type(torch.FloatTensor)
         if self.args.use_cuda is True:
             self.z_bucket = self.z_bucket.cuda()
             self.h_bucket = self.h_bucket.cuda()
@@ -98,7 +98,7 @@ class Decoder_WordLstm(nn.Module):
                     v = torch.cat((hidden_now, encoder_out[id_batch][id_char].view(1, self.args.rnn_hidden_dim * 2)), 1)
                     # print("232", v.size())
                     output = self.linear(v)
-                    if id_char is 0:
+                    if id_char == 0:
                         # print("oooooo")
                         output.data[0][self.args.create_alphabet.appID] = -10e+99
                     # self.action(state, id_char, encoder_out[id_batch], output, train)
@@ -164,14 +164,14 @@ class Decoder_WordLstm(nn.Module):
         if train is True:
             action = state.gold[index]
         else:
-            actionID =self.getMaxindex(output.view(self.args.label_size), self.args)
+            actionID = self.getMaxindex(self.args, output.view(self.args.label_size))
             action = self.args.create_alphabet.label_alphabet.from_id(actionID)
             # print(actionID)
             # print(action)
         state.actions.append(action)
 
         pos = action.find("#")
-        if pos is -1:
+        if pos == -1:
             # app
             state.words[-1] += state.chars[index]
         else:
@@ -184,13 +184,12 @@ class Decoder_WordLstm(nn.Module):
             state.word_cells.append(cell_now)
             state.word_hiddens.append(hidden_now)
 
-    def getMaxindex(self, decode_out_acc, args):
-        # print("get max index ......")
-        max = decode_out_acc.data[0]
+    def getMaxindex(self, args, decoder_output):
+        max = decoder_output.data[0]
         maxIndex = 0
         for idx in range(1, args.label_size):
-            if decode_out_acc.data[idx] > max:
-                max = decode_out_acc.data[idx]
+            if decoder_output.data[idx] > max:
+                max = decoder_output.data[idx]
                 maxIndex = idx
         return maxIndex
 
