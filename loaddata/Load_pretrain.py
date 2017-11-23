@@ -20,6 +20,7 @@ class Load_Pretrain:
 
     def load_pretrain(self, file, alpha, unk, padding):
         f = open(file, encoding='utf-8')
+        # allLines = f.readlines()
         allLines = f.readlines()[1:]
         indexs = set()
         info = allLines[0].strip().split(' ')
