@@ -269,8 +269,8 @@ class Alphabet():
 
     def initial_from_pretrain(self, pretrain_file, unk, padding):
         f = open(pretrain_file, encoding='utf-8')
-        # for line in f.readlines():
-        for line in f.readlines()[1:]:
+        for line in f.readlines():
+        # for line in f.readlines()[1:]:
             info = line.split(" ")
             self.loadWord2idAndId2Word(info[0])
         f.close()

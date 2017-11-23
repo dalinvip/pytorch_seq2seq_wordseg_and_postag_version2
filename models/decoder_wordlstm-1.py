@@ -95,11 +95,11 @@ class Decoder_WordLstm(nn.Module):
                     # not use lstm
                     # v = torch.cat((self.bucket_rnn, encoder_out[id_batch][id_char].view(1, self.args.rnn_hidden_dim * 2)), 1)
                     # use lstm
-                    # v = torch.cat((hidden_now, encoder_out[id_batch][id_char].view(1, self.args.rnn_hidden_dim * 2)), 1)
                     v = torch.cat((hidden_now, encoder_out[id_batch][id_char].view(1, self.args.rnn_hidden_dim * 2)), 1)
                     # print("232", v.size())
                     output = self.linear(v)
                     if id_char == 0:
+                        # print("oooooo")
                         output.data[0][self.args.create_alphabet.appID] = -10e+99
                     # self.action(state, id_char, encoder_out[id_batch], output, train)
                     self.action(state, id_char, output, hidden_now, cell_now, train)
