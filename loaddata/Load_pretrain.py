@@ -27,10 +27,9 @@ class Load_Pretrain:
         embDim = len(info) - 1
         emb = nn.Embedding(alpha.m_size, embDim)
 
-        init.uniform(emb.weight,
-                     a=-np.sqrt(3 / embDim),
-                     b=np.sqrt(3 / embDim))
+        init.uniform(emb.weight, a=-np.sqrt(3 / embDim), b=np.sqrt(3 / embDim))
         oov_emb = torch.zeros(1, embDim).type(torch.FloatTensor)
+
         for line in allLines:
             info = line.split(' ')
             wordID = alpha.loadWord2idAndId2Word(info[0])
@@ -48,8 +47,8 @@ class Load_Pretrain:
         paddingID = alpha.loadWord2idAndId2Word(padding)
         for idx in range(embDim):
             emb.weight.data[paddingID][idx] = 0
-        print('UNK ID: ', unkID)
-        print('Padding ID: ', paddingID)
+        # print('UNK ID: ', unkID)
+        # print('Padding ID: ', paddingID)
         if unkID != -1:
             for idx in range(embDim):
                 emb.weight.data[unkID][idx] = oov_emb[0][idx]
@@ -58,9 +57,8 @@ class Load_Pretrain:
         for idx in range(alpha.m_size):
             if idx not in indexs:
                 oov += 1
-        print("OOV Num: ", oov, "Total Num: ", alpha.m_size,
-              "OOV Ratio: ", oov / alpha.m_size)
-        print("OOV ", unk, "use avg value initialize")
+        print("oov: ", oov, " total: ", alpha.m_size, "oov ratio: ", oov / alpha.m_size)
+        print("oov ", unk, "use avg value initialize")
         return emb, embDim
 
 

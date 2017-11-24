@@ -22,14 +22,6 @@ class load_data():
         self.debug_index = -1
         self.path = path
         self.date_list = []
-        # self.shuffle = shuffle
-        # print(len(self.path))
-        # print(self.path)
-        # self.return_mul_data()
-        # print(self.path.size)
-        # print(self.date_list[0])
-        # print(self.date_list[1])
-        # print("asdasd", self.date_list)
 
     def clean_str(self, string):
         """

@@ -124,16 +124,6 @@ class Create_Alphabet():
             for gold in data.gold:
                 self.label_alphabet.loadWord2idAndId2Word(gold)
 
-            # copy with the seq/app/unkkey/nullkey/paddingkey
-            # self.word_state[unkkey] = self.min_freq + 1
-            # self.word_state[paddingkey] = self.min_freq + 1
-            # self.char_state[unkkey] = self.min_freq + 1
-            # self.char_state[paddingkey] = self.min_freq + 1
-            # self.bichar_state[unkkey] = self.min_freq + 1
-            # self.bichar_state[paddingkey] = self.min_freq + 1
-            # self.pos_state[unkkey] = 1
-            # self.pos_state[paddingkey] = 1
-
             if index == debug_index:
                 # only some sentence for debug
                 print(self.word_state, "************************")
@@ -143,6 +133,7 @@ class Create_Alphabet():
                 print(self.label_alphabet.words2id)
                 break
 
+        # copy with the seq/app/unkkey/nullkey/paddingkey
         self.word_state[unkkey] = self.word_min_freq
         self.word_state[paddingkey] = self.word_min_freq
         self.char_state[unkkey] = self.char_min_freq

@@ -163,10 +163,6 @@ class Iterators():
         batch_static_char_features = Variable(torch.LongTensor(batch_length, max_char_size))
         batch_static_bichar_left_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
         batch_static_bichar_right_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
-        # batch_static_bichar_left_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
-        # batch_static_bichar_right_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
-        # batch_static_bichar_left_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
-        # batch_static_bichar_right_features = Variable(torch.LongTensor(batch_length, max_bichar_size))
 
         batch_gold_features = Variable(torch.LongTensor(max_gold_size * batch_length))
 

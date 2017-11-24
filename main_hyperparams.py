@@ -15,7 +15,6 @@ from models import encoder_wordlstm
 from models import encoder_wordlstmcell
 import train_seq2seq
 import train_seq2seq_wordlstm
-import train_ALL_LSTM
 import multiprocessing as mu
 import shutil
 import random
@@ -253,7 +252,6 @@ if args.Wordlstm is True:
     model_encoder = encoder_wordlstmcell.Encoder_WordLstm(args)
 else:
     model_decoder = decoder.Decoder(args=args)
-    # model_encoder = encoder_wordlstm.Encoder_WordLstm(args)
     model_encoder = encoder.Encoder(args=args)
 print(model_encoder)
 print(model_decoder)
@@ -261,8 +259,7 @@ if args.use_cuda is True:
     print("using cuda......")
     model_encoder = model_encoder.cuda()
     model_decoder = model_decoder.cuda()
-    # model_encoder.cuda()
-    # model_decoder.cuda()
+
 # train
 print("\n CPU Count is {} and Current Process is {} \n".format(mu.cpu_count(), mu.current_process()))
 # set thread number
