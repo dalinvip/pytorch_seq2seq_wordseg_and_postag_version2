@@ -19,7 +19,7 @@
 	 seq2seq model
 
 ## Others
-	Reference version1 : "[https://github.com/bamtercelboo/pytorch_seq2seq_wordseg_and_postag](https://github.com/bamtercelboo/pytorch_seq2seq_wordseg_and_postag)"  
+Reference version1 : "[https://github.com/bamtercelboo/pytorch_seq2seq_wordseg_and_postag](https://github.com/bamtercelboo/pytorch_seq2seq_wordseg_and_postag)"  
 
 	tthe repo is version2 : the difference of two version during load pretrain word embedding 
 
